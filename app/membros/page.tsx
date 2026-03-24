@@ -41,6 +41,8 @@ import {
   UserCheck,
   UserX,
   Calendar,
+  Heart,
+  Briefcase,
 } from 'lucide-react';
 import { membroService } from '@/lib/services/data-service';
 import { 
@@ -350,17 +352,17 @@ export default function MembrosPage() {
             {membrosFiltrados.map((membro) => {
               const idade = calcularIdade(membro.dataNascimento);
               return (
-                <Card key={membro.id} className={`border-border bg-card ${!membro.ativo ? 'opacity-60' : ''}`}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-medium">
+                <Card key={membro.id} className={`border-border bg-card transition-all hover:shadow-lg ${!membro.ativo ? 'opacity-60' : ''}`}>
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30 text-primary font-semibold text-lg flex-shrink-0">
                           {membro.nome.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <p className="font-medium text-card-foreground">{membro.nome}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant={membro.ativo ? 'default' : 'secondary'}>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-card-foreground text-base truncate">{membro.nome}</p>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <Badge variant={membro.ativo ? 'default' : 'secondary'} className="text-xs">
                               {membro.ativo ? 'Ativo' : 'Inativo'}
                             </Badge>
                             {idade && (
@@ -371,7 +373,7 @@ export default function MembrosPage() {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" className="h-9 w-9 flex-shrink-0">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -405,41 +407,55 @@ export default function MembrosPage() {
                     </div>
 
                     <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        {membro.email}
+                      <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-lg">
+                        <Mail className="h-4 w-4 text-primary/60" />
+                        <span className="truncate text-xs sm:text-sm">{membro.email}</span>
                       </div>
                       {membro.telefone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4" />
-                          {membro.telefone}
+                        <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-lg">
+                          <Phone className="h-4 w-4 text-primary/60" />
+                          <span>{membro.telefone}</span>
                         </div>
                       )}
                       {membro.dataNascimento && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          {format(parseISO(membro.dataNascimento), 'dd/MM/yyyy')}
+                        <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-lg">
+                          <Calendar className="h-4 w-4 text-primary/60" />
+                          <span>{format(parseISO(membro.dataNascimento), 'dd/MM/yyyy')}</span>
                         </div>
                       )}
                     </div>
 
                     {membro.sacramentos.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-1">
-                        {membro.sacramentos.map((sacramento) => (
-                          <Badge key={sacramento} variant="secondary" className="text-xs">
-                            {SACRAMENTOS_LABELS[sacramento]}
-                          </Badge>
-                        ))}
+                      <div className="mt-3 pt-3 border-t border-border/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Heart className="h-3.5 w-3.5 text-primary/60" />
+                          <span className="text-xs font-semibold text-muted-foreground uppercase">Sacramentos</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {membro.sacramentos.map((sacramento) => (
+                            <Badge key={sacramento} variant="secondary" className="text-xs">
+                              {SACRAMENTOS_LABELS[sacramento]}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
 
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {membro.funcoes.map((funcao) => (
-                        <Badge key={funcao} variant="outline" className="text-xs">
-                          {FUNCOES_LABELS[funcao]}
-                        </Badge>
-                      ))}
-                    </div>
+                    {membro.funcoes.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-border/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Briefcase className="h-3.5 w-3.5 text-primary/60" />
+                          <span className="text-xs font-semibold text-muted-foreground uppercase">Funções</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {membro.funcoes.map((funcao) => (
+                            <Badge key={funcao} variant="outline" className="text-xs">
+                              {FUNCOES_LABELS[funcao]}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );

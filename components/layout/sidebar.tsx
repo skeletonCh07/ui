@@ -43,15 +43,17 @@ export function Sidebar() {
 
   const NavContent = () => (
     <>
-      <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
-        <Church className="h-8 w-8 text-primary" />
+      <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6 bg-gradient-to-r from-primary/10 to-transparent">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 border border-primary/30">
+          <Church className="h-6 w-6 text-primary" />
+        </div>
         <div className="flex flex-col">
-          <span className="text-sm font-semibold text-sidebar-foreground">Escala Missa</span>
-          <span className="text-xs text-muted-foreground">Gestao de Liturgia</span>
+          <span className="text-sm font-bold text-sidebar-foreground">Escala Missa</span>
+          <span className="text-xs text-muted-foreground">Gestão Litúrgica</span>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 space-y-2 px-3 py-4">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -60,27 +62,28 @@ export function Sidebar() {
               href={item.href}
               onClick={() => setMobileOpen(false)}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                 isActive
-                  ? 'bg-sidebar-accent text-primary'
-                  : 'text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                  ? 'bg-gradient-to-r from-primary/30 to-primary/10 text-primary border border-primary/20 shadow-sm'
+                  : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
               )}
             >
-              <item.icon className="h-5 w-5" />
-              {item.name}
+              <item.icon className="h-5 w-5 flex-shrink-0" />
+              <span>{item.name}</span>
+              {isActive && <div className="ml-auto h-2 w-2 rounded-full bg-primary" />}
             </Link>
           );
         })}
       </nav>
 
       <div className="border-t border-sidebar-border p-4">
-        <div className="flex items-center gap-3 rounded-lg bg-sidebar-accent px-3 py-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
+        <div className="flex items-center gap-3 rounded-lg bg-gradient-to-r from-primary/10 to-secondary/10 px-3 py-3 border border-primary/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold flex-shrink-0">
             {usuario?.nome?.charAt(0).toUpperCase() || 'U'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="truncate text-sm font-medium text-sidebar-foreground">
-              {usuario?.nome || 'Usuario'}
+            <p className="truncate text-sm font-semibold text-sidebar-foreground">
+              {usuario?.nome || 'Usuário'}
             </p>
             <p className="truncate text-xs text-muted-foreground">
               {isMembro ? 'Membro' : usuario?.role === 'admin' ? 'Administrador' : 'Coordenador'}
@@ -90,7 +93,7 @@ export function Sidebar() {
             variant="ghost"
             size="icon"
             onClick={logout}
-            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            className="h-8 w-8 text-muted-foreground hover:text-destructive flex-shrink-0"
           >
             <LogOut className="h-4 w-4" />
           </Button>

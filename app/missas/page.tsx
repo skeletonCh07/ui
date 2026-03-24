@@ -31,15 +31,25 @@ import {
   MapPin,
   Church,
   CalendarPlus,
+  Loader2,
+  Sparkles,
 } from 'lucide-react';
 import { missaService, escalaService } from '@/lib/services/data-service';
 import type { Missa } from '@/lib/types';
-import { format, parseISO, isBefore, startOfDay } from 'date-fns';
+import { format, parseISO, isBefore, startOfDay, getDaysInMonth, startOfMonth, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import Link from 'next/link';
 
+interface CalendarEvent {
+  date: string;
+  title: string;
+  season?: string;
+}
+
 export default function MissasPage() {
   const [missas, setMissas] = useState<Missa[]>([]);
+  const [calendarDates, setCalendarDates] = useState<CalendarEvent[]>([]);
+  const [loadingCalendar, setLoadingCalendar] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editando, setEditando] = useState<Missa | null>(null);
   const [formData, setFormData] = useState({
@@ -59,8 +69,36 @@ export default function MissasPage() {
     setMissas(todas);
   };
 
+  const carregarDatasLiturgia = async () => {
+    try {
+      setLoadingCalendar(true);
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const monthStr = `${year}-${month}`;
+      
+      const response = await fetch(`http://calapi.inadiutorium.cz/api/v0/pt/calendars/default/${year}/${month}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.days) {
+          const eventos = Object.entries(data.days).map(([dateKey, day]: [string, any]) => ({
+            date: dateKey,
+            title: day.name || day.title || 'Festa',
+            season: day.season || '',
+          }));
+          setCalendarDates(eventos);
+        }
+      }
+    } catch (error) {
+      console.log('[v0] Erro ao carregar datas do calendário:', error);
+    } finally {
+      setLoadingCalendar(false);
+    }
+  };
+
   useEffect(() => {
     carregarMissas();
+    carregarDatasLiturgia();
   }, []);
 
   const abrirDialogNovo = () => {
@@ -107,35 +145,46 @@ export default function MissasPage() {
     return !!escalaService.buscarPorMissa(missaId);
   };
 
+  const obterEventoCalendario = (data: string) => {
+    return calendarDates.find(e => e.date === data);
+  };
+
   const MissaCard = ({ missa }: { missa: Missa }) => {
     const passada = isBefore(parseISO(missa.data), hoje);
     const escalaExiste = temEscala(missa.id);
+    const evento = obterEventoCalendario(missa.data);
 
     return (
-      <Card className={`border-border bg-card ${passada ? 'opacity-60' : ''}`}>
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 flex-col items-center justify-center rounded-lg bg-primary/10">
-                <span className="text-xs text-muted-foreground">
+      <Card className={`border-border bg-card transition-all hover:shadow-lg ${passada ? 'opacity-60' : ''}`}>
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-4 flex-1">
+              <div className="flex h-16 w-16 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/30">
+                <span className="text-xs font-semibold text-primary/80">
                   {format(parseISO(missa.data), 'MMM', { locale: ptBR }).toUpperCase()}
                 </span>
-                <span className="text-xl font-bold text-primary">
+                <span className="text-2xl font-bold text-primary">
                   {format(parseISO(missa.data), 'd')}
                 </span>
               </div>
-              <div>
-                <p className="font-medium text-card-foreground">
+              <div className="flex-1">
+                <p className="font-semibold text-card-foreground text-base">
                   {missa.descricao || 'Missa'}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground capitalize">
                   {format(parseISO(missa.data), "EEEE", { locale: ptBR })}
                 </p>
+                {evento && (
+                  <p className="text-xs text-primary/70 font-medium mt-1 flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    {evento.title}
+                  </p>
+                )}
               </div>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -163,26 +212,26 @@ export default function MissasPage() {
             </DropdownMenu>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {missa.horario}
+          <div className="mt-4 flex flex-wrap gap-3 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-lg">
+              <Clock className="h-4 w-4 text-primary/60" />
+              <span className="font-medium">{missa.horario}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
-              {missa.local}
+            <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-lg">
+              <MapPin className="h-4 w-4 text-primary/60" />
+              <span className="font-medium">{missa.local}</span>
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between">
+          <div className="mt-4 flex items-center justify-between pt-3 border-t border-border/50">
             {escalaExiste ? (
-              <Badge variant="default">Com Escala</Badge>
+              <Badge variant="default" className="bg-primary/80">Com Escala</Badge>
             ) : (
               <Badge variant="outline">Sem Escala</Badge>
             )}
             {!passada && !escalaExiste && (
               <Link href={`/escalas/nova?missaId=${missa.id}`}>
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" className="border-primary/30 hover:bg-primary/10">
                   <CalendarPlus className="mr-2 h-4 w-4" />
                   Criar Escala
                 </Button>
@@ -198,9 +247,11 @@ export default function MissasPage() {
     <AppShell>
       <Header
         title="Missas"
-        description="Gerencie as missas da paroquia"
+        description="Gerencie as missas da paroquia com datas do calendário litúrgico"
         action={
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <div className="flex items-center gap-2">
+            {loadingCalendar && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={abrirDialogNovo}>
                 <Plus className="mr-2 h-4 w-4" />
@@ -266,7 +317,8 @@ export default function MissasPage() {
                 </div>
               </form>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </div>
         }
       />
 

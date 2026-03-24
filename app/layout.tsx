@@ -7,8 +7,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'Escala Missa - Gestao de Liturgia',
-  description: 'Sistema para gerenciar escalas de voluntarios em missas',
+  title: 'Escala Missa - Gestão de Liturgia',
+  description: 'Sistema moderno para gerenciar escalas de membros em missas com calendário litúrgico integrado',
   icons: {
     icon: [
       {
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1a1a2e',
+  themeColor: '#8b5cf6',
 }
 
 export default function RootLayout({

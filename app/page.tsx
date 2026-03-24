@@ -16,15 +16,15 @@ import {
   ArrowRight,
   Clock,
 } from 'lucide-react';
-import { voluntarioService, missaService, escalaService } from '@/lib/services/data-service';
+import { membroService, missaService, escalaService } from '@/lib/services/data-service';
 import { STATUS_LABELS } from '@/lib/types';
-import type { Voluntario, Missa, Escala } from '@/lib/types';
+import type { Membro, Missa, Escala } from '@/lib/types';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
-    voluntarios: 0,
+    membros: 0,
     missasProximas: 0,
     escalasPendentes: 0,
   });
@@ -32,7 +32,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const voluntarios = voluntarioService.listar();
+    const membros = membroService.listar();
     const missasProximas = missaService.listarProximas();
     const escalas = escalaService.listar();
 
@@ -41,7 +41,7 @@ export default function DashboardPage() {
     ).length;
 
     setStats({
-      voluntarios: voluntarios.filter((v) => v.ativo).length,
+      membros: membros.filter((m) => m.ativo).length,
       missasProximas: missasProximas.length,
       escalasPendentes,
     });
@@ -56,11 +56,11 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      title: 'Voluntarios Ativos',
-      value: stats.voluntarios,
+      title: 'Membros Ativos',
+      value: stats.membros,
       icon: Users,
       color: 'text-primary',
-      href: '/voluntarios',
+      href: '/membros',
     },
     {
       title: 'Proximas Missas',
@@ -195,11 +195,11 @@ export default function DashboardPage() {
 
         {/* Acoes Rapidas */}
         <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Link href="/voluntarios">
+          <Link href="/membros">
             <Card className="cursor-pointer border-border bg-card transition-colors hover:bg-secondary">
               <CardContent className="flex items-center gap-3 p-4">
                 <Users className="h-5 w-5 text-primary" />
-                <span className="text-sm font-medium text-card-foreground">Gerenciar Voluntarios</span>
+                <span className="text-sm font-medium text-card-foreground">Gerenciar Membros</span>
               </CardContent>
             </Card>
           </Link>
